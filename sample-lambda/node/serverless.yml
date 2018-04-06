@@ -1,0 +1,29 @@
+service: node-s3-reader
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+        - s3:GetObject
+      Resource: arn:aws:s3::${opt:bucketName}
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+        - s3:GetObject
+      Resource: arn:aws:s3::${opt:bucketName}/*
+
+  environment:
+    bucketName: "${opt:bucketName}"
+
+functions:
+  getAll:
+    handler: handler.getAll
+    events:
+      - http:
+          path: /
+          method: get
+     

@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.vm.define "es1" do |es|
+    es.vm.box = "centos/7"
+    es.vm.hostname = 'es1'
+
+    # config.vm.network "private_network", type: "dhcp"
+    # config.vm.network "forwarded_port", guest: 9100, host: 9100
+    # config.vm.network "forwarded_port", guest: 9200, host: 9200
+    config.vm.network "public_network", bridge: "wlp3s0"
+
+    config.vm.network "forwarded_port", guest: 9200, host: 9200, auto_correct: true
+    config.vm.network "forwarded_port", guest: 5601, host: 5601, auto_correct: true
+
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+    end
+
+    config.vm.provision "shell", inline: <<-SHELL
+      chmod +x /vagrant/script.sh
+      /vagrant/script.sh
+    SHELL
+  end
+end

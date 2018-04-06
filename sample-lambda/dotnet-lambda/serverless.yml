@@ -1,0 +1,22 @@
+service: dotnet-lambda
+
+provider:
+  name: aws
+  runtime: dotnetcore1.0
+
+stage: dev
+region: us-east-1
+
+package:
+  artifact: bin/release/netcoreapp1.0/dotnet-lambda.zip
+
+functions:
+  hello:
+    memorySize: 256
+    timeout: 30
+    handler: CsharpHandlers::AwsDotnetCsharp.Handler::Hello
+    events:
+      - http:
+          path: /
+          method: get
+          integration: lambda

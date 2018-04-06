@@ -1,0 +1,30 @@
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    config.vm.box = "ubuntu/trusty64"
+    config.vm.provision "shell", path: "shell.sh", privileged: true
+
+    (1..2).each do |sequence|
+        config.vm.define "d-m#{sequence}" do |node|
+            node.vm.network "public_network", bridge: "wlp3s0"
+            node.vm.hostname = "d-m#{sequence}"
+            node.vm.provision "shell",
+              inline: "docker swarm join --token SWMTKN-1-3v5499wwiesba48mwzlxjpvk6zfepb3bb40dezwnbcj015uk5g-cwbd3mb1qmlrzgjaj4gu9d73b 192.168.0.28:2377"
+        end
+    end
+
+    (1..3).each do |sequence|
+        config.vm.define "d-w#{sequence}" do |node|
+            node.vm.network "public_network", bridge: "wlp3s0"
+            node.vm.hostname = "d-w#{sequence}"
+            node.vm.provision "shell",
+              inline: "docker swarm join --token SWMTKN-1-3v5499wwiesba48mwzlxjpvk6zfepb3bb40dezwnbcj015uk5g-dhwhsob96c3ezrlo3ht6r46o6 192.168.0.28:2377"
+        end
+    end
+
+    config.vm.provider "virtualbox" do |v|
+        v.memory = 2048
+        v.cpus = 1
+    end
+end
