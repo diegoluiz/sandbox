@@ -1,0 +1,29 @@
+service: aws-nodejs # NOTE: update this with your service name
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+
+custom:
+  serverless-offline:
+    resourceRoutes: true
+
+plugins:
+  - serverless-offline
+
+functions:
+  github:
+    handler: handler.github
+    events:
+      - http:
+          path: github
+          method: post
+          request:
+            parameters:
+              querystrings:
+                channel: false
+            template:
+              application/json: >
+                {
+                  "body": $input.json('$')
+                }          
