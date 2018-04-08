@@ -35,16 +35,16 @@ Vagrant.configure("2") do |config|
     sed -i.bak 's/start_rpc: false/start_rpc: true/' /etc/cassandra/cassandra.yaml
     service cassandra restart
 
-    chmod -R 777 /opt/
-
-    cp conf/gremlin-server/janusgraph-cassandra-es-server.properties conf/gremlin-server/http-janusgraph-cassandra-es-server.properties
+    cp /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/janusgraph-cassandra-es-server.properties /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/http-janusgraph-cassandra-es-server.properties
 
     cat /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/gremlin-server.yaml | \
       sed 's/org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer/org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer/' | \
-      sed 's/janusgraph-cassandra-es-server.properties/http-janusgraph-cassandra-es-server.properties/' > \
+      sed 's/conf\/gremlin-server\/janusgraph-cassandra-es-server.properties/\/opt\/janusgraph\/janusgraph-0.2.0-hadoop2\/conf\/gremlin-server\/http-janusgraph-cassandra-es-server.properties/' > \
       /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/http-gremlin-server.yaml
 
-    nohup bin/gremlin-server.sh /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/http-gremlin-server.yaml &
+    chmod -R 777 /opt/
+
+    nohup /opt/janusgraph/janusgraph-0.2.0-hadoop2/bin/gremlin-server.sh /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/http-gremlin-server.yaml &
 
   SHELL
 end
