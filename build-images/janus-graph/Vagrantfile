@@ -3,7 +3,8 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
-  config.vm.network "public_network", bridge: "wlp2s0"
+  config.vm.network "forwarded_port", guest: 8182, host: 8182
+  config.vm.network "forwarded_port", guest: 9200, host: 9200
   config.vm.provider "virtualbox" do |v|
     v.memory = 4096
     v.cpus = 4
@@ -30,9 +31,20 @@ Vagrant.configure("2") do |config|
     curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add - 
     apt-key adv --keyserver pool.sks-keyservers.net --recv-key A278B781FE4B2BDA 
     apt-get update 
-    apt-get install cassandra 
+    apt-get install -y cassandra 
+    sed -i.bak 's/start_rpc: false/start_rpc: true/' /etc/cassandra/cassandra.yaml
+    service cassandra restart
 
-    /opt/janusgraph/janusgraph-0.2.0-hadoop2/bin/janusgraph.sh start
+    chmod -R 777 /opt/
+
+    cp conf/gremlin-server/janusgraph-cassandra-es-server.properties conf/gremlin-server/http-janusgraph-cassandra-es-server.properties
+
+    cat /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/gremlin-server.yaml | \
+      sed 's/org.apache.tinkerpop.gremlin.server.channel.WebSocketChannelizer/org.apache.tinkerpop.gremlin.server.channel.HttpChannelizer/' | \
+      sed 's/janusgraph-cassandra-es-server.properties/http-janusgraph-cassandra-es-server.properties/' > \
+      /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/http-gremlin-server.yaml
+
+    nohup bin/gremlin-server.sh /opt/janusgraph/janusgraph-0.2.0-hadoop2/conf/gremlin-server/http-gremlin-server.yaml &
 
   SHELL
 end
