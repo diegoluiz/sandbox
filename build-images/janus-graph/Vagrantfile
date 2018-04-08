@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.network "public_network", bridge: "wlp2s0"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 4096
+    v.cpus = 4
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    add-apt-repository ppa:webupd8team/java -y
+    apt update
+    echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections
+    echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true" | debconf-set-selections
+
+    apt-get -y install curl unzip oracle-java8-installer
+  
+    [ ! -f /vagrant/janusgraph-0.2.0-hadoop2.zip ] && wget https://github.com/JanusGraph/janusgraph/releases/download/v0.2.0/janusgraph-0.2.0-hadoop2.zip -P /vagrant/
+    mkdir -p /opt/janusgraph
+    chmod 777 -R /opt/janusgraph
+    unzip /vagrant/janusgraph-0.2.0-hadoop2.zip -d /opt/janusgraph/
+
+    [ ! -f /vagrant/elasticsearch-6.2.3.deb ] && wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.3.deb -P /vagrant
+    dpkg -i /vagrant/elasticsearch-6.2.3.deb
+    service elasticsearch restart
+
+    echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | tee -a /etc/apt/sources.list.d/cassandra.sources.list 
+    curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add - 
+    apt-key adv --keyserver pool.sks-keyservers.net --recv-key A278B781FE4B2BDA 
+    apt-get update 
+    apt-get install cassandra 
+
+    /opt/janusgraph/janusgraph-0.2.0-hadoop2/bin/janusgraph.sh start
+
+  SHELL
+end
