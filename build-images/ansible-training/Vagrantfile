@@ -1,0 +1,40 @@
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/xenial64"
+  # config.vm.provision "shell", path: "shell.sh", privileged: true
+
+  (1..1).each do |sequence|
+      config.vm.define "master-#{sequence}" do |node|
+          # node.vm.network "public_network", bridge: "wlp2s0"
+          node.vm.hostname = "master-#{sequence}"
+          # node.vm.provision "shell",
+            # inline: "bash /vagrant/shell-janus.sh"
+      end
+  end
+
+  (1..1).each do |sequence|
+      config.vm.define "es-#{sequence}" do |node|
+          # node.vm.network "public_network", bridge: "wlp2s0"
+          node.vm.hostname = "es-#{sequence}"
+          # node.vm.provision "shell",
+            # inline: "bash /vagrant/shell-es.sh"
+      end
+  end
+
+  (1..1).each do |sequence|
+      config.vm.define "cs-#{sequence}" do |node|
+          # node.vm.network "public_network", bridge: "wlp2s0"
+          node.vm.hostname = "mo-#{sequence}"
+          # node.vm.provision "shell",
+            # inline: "bash /vagrant/shell-cs.sh"
+      end
+  end
+
+  config.vm.provider "virtualbox" do |v|
+      v.memory = 2048
+      v.cpus = 1
+  end
+end
+
+
