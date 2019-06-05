@@ -7,7 +7,7 @@ namespace dotnet_friend_help
     public abstract class BasePart
     {
         public string Name { get; set; }
-        public int Value { get; set; }
+        public virtual int Value { get; set; }
 
         public abstract bool IsSimple { get; }
     }
@@ -19,9 +19,28 @@ namespace dotnet_friend_help
 
     public class CompoundPart : BasePart
     {
+        private int? _internalValue;
+
         public override bool IsSimple => false;
 
         public List<Tuple<BasePart, int>> SubParts { get; set; } = new List<Tuple<BasePart, int>>();
+
+        public override int Value
+        {
+            get
+            {
+                if (!_internalValue.HasValue)
+                {
+                    _internalValue = 0;
+                    foreach (var subPart in SubParts)
+                    {
+                        _internalValue += (subPart.Item1.Value * subPart.Item2);
+                    }
+                }
+
+                return _internalValue.Value;
+            }
+        }
     }
 
     class Program
@@ -35,7 +54,6 @@ namespace dotnet_friend_help
             {
                 Console.WriteLine($"{part.Value.Name} - {part.Value.IsSimple} - {part.Value.Value}");
             }
-
         }
 
         private static Dictionary<string, BasePart> ReadFile(string file)
